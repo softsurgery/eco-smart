@@ -6,23 +6,174 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1087</width>
-    <height>615</height>
+    <width>1047</width>
+    <height>577</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Employee</string>
+   <string>Employee Management</string>
   </property>
-  <widget class="QTableWidget" name="tableWidget">
-   <property name="geometry">
-    <rect>
-     <x>200</x>
-     <y>120</y>
-     <width>851</width>
-     <height>451</height>
-    </rect>
-   </property>
-  </widget>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="grpEmployeeDetails">
+     <property name="title">
+      <string>Employee Details</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="7" column="0">
+       <widget class="QLabel" name="lblEmployeeUpdatedAt">
+        <property name="text">
+         <string>Updated At</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QDateTimeEdit" name="dtEmployeeUpdatedAt">
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="leEmployeeSurname"/>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="leEmployeePhone"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblEmployeePhone">
+        <property name="text">
+         <string>Phone</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="lblEmployeeCreatedAt">
+        <property name="text">
+         <string>Created At</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="lblEmployeeAvailable">
+        <property name="text">
+         <string>Available</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="chkEmployeeAvailable">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="leEmployeeJob"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblEmployeeId">
+        <property name="text">
+         <string>ID</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="leEmployeeName"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lblEmployeeJob">
+        <property name="text">
+         <string>Job</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblEmployeeSurname">
+        <property name="text">
+         <string>Surname</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QDateTimeEdit" name="dtEmployeeCreatedAt">
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblEmployeeName">
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="leEmployeeId"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayoutButtons">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnAddEmployee">
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnUpdateEmployee">
+       <property name="text">
+        <string>Update</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnDeleteEmployee">
+       <property name="text">
+        <string>Delete</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClearEmployee">
+       <property name="text">
+        <string>Clear</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTableView" name="tvEmployees">
+     <property name="editTriggers">
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

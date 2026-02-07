@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "employee.h"
+#include "employeewindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,7 +20,7 @@ MainWindow::~MainWindow()
 void MainWindow::onDashboardButtonClicked()
 {
     if (employeeWindow == nullptr) {
-        employeeWindow = new Employee();
+        employeeWindow = new EmployeeWindow();
     }
     employeeWindow->show();
     this->close();

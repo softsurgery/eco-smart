@@ -10,11 +10,13 @@ CONFIG += c++17
 
 SOURCES += \
     employee.cpp \
+    employeewindow.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     employee.h \
+    employeewindow.h \
     mainwindow.h
 
 FORMS += \

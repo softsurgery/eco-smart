@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-class Employee;
+class EmployeeWindow;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,6 +24,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    Employee *employeeWindow;
+    EmployeeWindow *employeeWindow;
 };
 #endif // MAINWINDOW_H
