@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+class Employee;
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -17,7 +19,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void onDashboardButtonClicked();
+
 private:
     Ui::MainWindow *ui;
+    Employee *employeeWindow;
 };
 #endif // MAINWINDOW_H
