@@ -3,8 +3,10 @@
 
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlDatabase>
 #include <QDebug>
 #include <QVariantList>
+#include <QMessageBox>
 
 class DatabaseUtils {
 public:
