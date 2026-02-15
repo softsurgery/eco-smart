@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         qDebug() << "Database connected successfully!";
     }
 
-    // Create employees table and sequence if they don't exist
+    // Create employees table if it doesn't exist (no auto-increment)
     QSqlQuery createTable;
     QString createTableQuery = 
         "CREATE TABLE employees ("
@@ -53,20 +53,7 @@ int main(int argc, char *argv[])
     // Try to create table (ignore if exists)
     createTable.exec(createTableQuery);
     
-    // Create sequence for auto-incrementing ID
-    QSqlQuery createSeq;
-    createSeq.exec("CREATE SEQUENCE employees_seq START WITH 1 INCREMENT BY 1");
-    
-    // Create trigger for auto-increment
-    QSqlQuery createTrigger;
-    QString triggerQuery = 
-        "CREATE OR REPLACE TRIGGER employees_id_trigger "
-        "BEFORE INSERT ON employees "
-        "FOR EACH ROW "
-        "BEGIN "
-        "  SELECT employees_seq.NEXTVAL INTO :NEW.id FROM dual; "
-        "END;";
-    createTrigger.exec(triggerQuery);
+    // No sequence or trigger needed - IDs will be generated manually
 
     MainWindow w;
     w.show();

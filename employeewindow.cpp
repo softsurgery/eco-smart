@@ -69,12 +69,13 @@ void EmployeeWindow::setupTableModel()
     ui->tvEmployees->setColumnWidth(3, 150); // Job
     ui->tvEmployees->setColumnWidth(4, 120); // Phone
     ui->tvEmployees->setColumnWidth(5, 80);  // Available
-    ui->tvEmployees->setColumnWidth(6, 150); // Created At
-    ui->tvEmployees->setColumnWidth(7, 150); // Updated At
+    ui->tvEmployees->setColumnWidth(6, 400); // Created At
+    ui->tvEmployees->setColumnWidth(7, 400); // Updated At
     
     // Set selection behavior
     ui->tvEmployees->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tvEmployees->setSelectionMode(QAbstractItemView::SingleSelection);
+
 }
 
 void EmployeeWindow::loadEmployees()
@@ -315,4 +316,18 @@ void EmployeeWindow::populateForm(const Employee &employee)
     m_selectedEmployeeId = employee.getId();
     ui->btnUpdateEmployee->setEnabled(true);
     ui->btnDeleteEmployee->setEnabled(true);
+}
+
+bool EmployeeWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    // Handle focus out event for the table view
+    if (obj == ui->tvEmployees && event->type() == QEvent::FocusOut) {
+        // Clear the table selection when focus is lost
+        ui->tvEmployees->clearSelection();
+        // This will trigger onEmployeeTableSelectionChanged which will handle
+        // clearing the form and disabling buttons
+    }
+    
+    // Call the parent class event filter for other events
+    return QWidget::eventFilter(obj, event);
 }

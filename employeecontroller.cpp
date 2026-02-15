@@ -1,42 +1,92 @@
 #include "employeecontroller.h"
 #include "databaseutils.h"
 #include <QSqlQuery>
+#include <QSqlDatabase>
 #include <QVariant>
 #include <QDateTime>
 #include <QDebug>
+#include <QMutexLocker>
+
+// Static members for thread-safe ID generation
+QMutex EmployeeController::s_idMutex;
+int EmployeeController::s_lastId = 0;
 
 EmployeeController::EmployeeController(QObject *parent)
-    : QObject(parent) {}
+    : QObject(parent) {
+    // Initialize the static ID counter based on existing database records
+    initializeIdCounter();
+}
+
+int EmployeeController::generateUniqueId() {
+    QMutexLocker locker(&s_idMutex);
+    
+    // Generate timestamp-based ID (current time in milliseconds since epoch)
+    qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+    int newId = static_cast<int>(timestamp % 2147483647); // Keep within int range
+    
+    // Ensure uniqueness by incrementing if we get the same timestamp
+    if (newId <= s_lastId) {
+        newId = s_lastId + 1;
+    }
+    
+    s_lastId = newId;
+    return newId;
+}
+
+void EmployeeController::initializeIdCounter() {
+    QMutexLocker locker(&s_idMutex);
+    
+    // Only initialize once
+    if (s_lastId != 0) {
+        return;
+    }
+    
+    // Query the database to find the current maximum ID
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        // If database is not open, use timestamp as starting point
+        s_lastId = static_cast<int>(QDateTime::currentMSecsSinceEpoch() % 2147483647);
+        return;
+    }
+    
+    QSqlQuery query(db);
+    if (query.exec("SELECT MAX(id) FROM employees")) {
+        if (query.next() && !query.value(0).isNull()) {
+            int maxId = query.value(0).toInt();
+            // Start with the higher of: max existing ID or current timestamp
+            qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+            int timestampId = static_cast<int>(timestamp % 2147483647);
+            s_lastId = qMax(maxId, timestampId);
+        } else {
+            // No records exist, use current timestamp
+            s_lastId = static_cast<int>(QDateTime::currentMSecsSinceEpoch() % 2147483647);
+        }
+    } else {
+        // Query failed, use timestamp
+        s_lastId = static_cast<int>(QDateTime::currentMSecsSinceEpoch() % 2147483647);
+    }
+    query.finish();
+}
 
 void EmployeeController::createEmployee(const Employee &employee) {
     Employee newEmployee = employee;
-    newEmployee.setCreatedAt(QDateTime::currentDateTime());
-    newEmployee.setUpdatedAt(QDateTime::currentDateTime());
     
-    // For Oracle with auto-increment trigger, don't specify ID in INSERT
-    QString queryStr = "INSERT INTO employees (name, surname, job, phone, available, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    QVariantList params = {newEmployee.getName(), newEmployee.getSurname(), newEmployee.getJob(), 
+    // Generate unique ID manually
+    int newId = generateUniqueId();
+    newEmployee.setId(newId);
+    
+    QDateTime currentTime = QDateTime::currentDateTime();
+    newEmployee.setCreatedAt(currentTime);
+    newEmployee.setUpdatedAt(currentTime);
+    
+    // Insert with manually generated ID
+    QString queryStr = "INSERT INTO employees (id, name, surname, job, phone, available, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    QVariantList params = {newEmployee.getId(), newEmployee.getName(), newEmployee.getSurname(), newEmployee.getJob(), 
                           newEmployee.getPhone(), newEmployee.isAvailable() ? 1 : 0, 
                           newEmployee.getCreatedAt(), 
                           newEmployee.getUpdatedAt()};
 
     if (DatabaseUtils::executeQuery(queryStr, params)) {
-        // Retrieve the generated ID by querying the last inserted record
-        QSqlDatabase db = QSqlDatabase::database();
-        QSqlQuery query(db);
-        QString selectQuery = "SELECT id FROM employees WHERE name = ? AND surname = ? AND job = ? AND phone = ? ORDER BY created_at DESC";
-        query.prepare(selectQuery);
-        query.addBindValue(newEmployee.getName());
-        query.addBindValue(newEmployee.getSurname());
-        query.addBindValue(newEmployee.getJob());
-        query.addBindValue(newEmployee.getPhone());
-        
-        if (query.exec() && query.next()) {
-            int generatedId = query.value(0).toInt();
-            newEmployee.setId(generatedId);
-        }
-        query.finish();
-        
         m_employees.append(newEmployee);
         emit employeeCreated(newEmployee);
     }

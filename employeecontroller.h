@@ -4,6 +4,7 @@
 #include "employee.h"
 #include <QObject>
 #include <QList>
+#include <QMutex>
 
 class EmployeeController : public QObject {
     Q_OBJECT
@@ -23,6 +24,10 @@ signals:
 
 private:
     QList<Employee> m_employees;
+    static int generateUniqueId();
+    static void initializeIdCounter();
+    static QMutex s_idMutex;
+    static int s_lastId;
 };
 
 #endif // EMPLOYEECONTROLLER_H
