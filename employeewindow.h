@@ -30,6 +30,9 @@ private slots:
     void onEmployeeUpdated(const Employee &employee);
     void onEmployeeDeleted(int id);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 private:
     void setupUI();
     void setupTableModel();
