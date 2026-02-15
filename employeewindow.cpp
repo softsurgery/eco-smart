@@ -15,8 +15,8 @@ EmployeeWindow::EmployeeWindow(QWidget *parent)
     , m_selectedEmployeeId(-1)
 {
     ui->setupUi(this);
-    setupUI();
     setupTableModel();
+    setupUI();
     loadEmployees();
 }
 
@@ -33,9 +33,11 @@ void EmployeeWindow::setupUI()
     connect(ui->btnDeleteEmployee, &QPushButton::clicked, this, &EmployeeWindow::onDeleteEmployeeClicked);
     connect(ui->btnClearEmployee, &QPushButton::clicked, this, &EmployeeWindow::onClearEmployeeClicked);
     
-    // Connect table selection
-    connect(ui->tvEmployees->selectionModel(), &QItemSelectionModel::currentRowChanged,
-            this, &EmployeeWindow::onEmployeeTableSelectionChanged);
+    // Connect table selection (check if selectionModel exists)
+    if (ui->tvEmployees->selectionModel()) {
+        connect(ui->tvEmployees->selectionModel(), &QItemSelectionModel::currentRowChanged,
+                this, &EmployeeWindow::onEmployeeTableSelectionChanged);
+    }
     
     // Connect controller signals
     connect(m_controller, &EmployeeController::employeeCreated, this, &EmployeeWindow::onEmployeeCreated);
@@ -61,6 +63,12 @@ void EmployeeWindow::setupTableModel()
     });
     
     ui->tvEmployees->setModel(m_tableModel);
+    
+    // Connect table selection after model is set
+    if (ui->tvEmployees->selectionModel()) {
+        connect(ui->tvEmployees->selectionModel(), &QItemSelectionModel::currentRowChanged,
+                this, &EmployeeWindow::onEmployeeTableSelectionChanged);
+    }
     
     // Set column widths
     ui->tvEmployees->setColumnWidth(0, 50);  // ID

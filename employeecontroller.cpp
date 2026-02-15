@@ -28,10 +28,25 @@ void EmployeeController::createEmployee(const Employee &employee) {
 
 QList<Employee> EmployeeController::readEmployees() const {
     QList<Employee> employees;
-    QSqlQuery query("SELECT id, name, surname, job, phone, available, created_at, updated_at FROM employees");
+    
+    // Check database connection first
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        qDebug() << "Database is not connected";
+        return employees;
+    }
+    
+    QSqlQuery query(db);
+    QString queryStr = "SELECT id, name, surname, job, phone, available, created_at, updated_at FROM employees";
+    
+    if (!query.prepare(queryStr)) {
+        qDebug() << "Failed to prepare read query:" << query.lastError().text();
+        return employees;
+    }
 
     if (!query.exec()) {
-        qDebug() << "Failed to execute query:" << query.lastError().text();
+        qDebug() << "Failed to execute query:" << query.lastError().text() << ", " << query.lastError().nativeErrorCode() << " " << query.lastError().driverText();
+        query.finish();
         return employees;
     }
 
@@ -47,7 +62,8 @@ QList<Employee> EmployeeController::readEmployees() const {
         employee.setUpdatedAt(query.value(7).toDateTime());
         employees.append(employee);
     }
-
+    
+    query.finish();
     return employees;
 }
 
