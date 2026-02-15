@@ -33,12 +33,6 @@ void EmployeeWindow::setupUI()
     connect(ui->btnDeleteEmployee, &QPushButton::clicked, this, &EmployeeWindow::onDeleteEmployeeClicked);
     connect(ui->btnClearEmployee, &QPushButton::clicked, this, &EmployeeWindow::onClearEmployeeClicked);
     
-    // Connect table selection (check if selectionModel exists)
-    if (ui->tvEmployees->selectionModel()) {
-        connect(ui->tvEmployees->selectionModel(), &QItemSelectionModel::currentRowChanged,
-                this, &EmployeeWindow::onEmployeeTableSelectionChanged);
-    }
-    
     // Connect controller signals
     connect(m_controller, &EmployeeController::employeeCreated, this, &EmployeeWindow::onEmployeeCreated);
     connect(m_controller, &EmployeeController::employeeUpdated, this, &EmployeeWindow::onEmployeeUpdated);
@@ -64,11 +58,9 @@ void EmployeeWindow::setupTableModel()
     
     ui->tvEmployees->setModel(m_tableModel);
     
-    // Connect table selection after model is set
-    if (ui->tvEmployees->selectionModel()) {
-        connect(ui->tvEmployees->selectionModel(), &QItemSelectionModel::currentRowChanged,
-                this, &EmployeeWindow::onEmployeeTableSelectionChanged);
-    }
+    // Connect table selection after model is set (use selectionChanged for better responsiveness)
+    connect(ui->tvEmployees->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &EmployeeWindow::onEmployeeTableSelectionChanged);
     
     // Set column widths
     ui->tvEmployees->setColumnWidth(0, 50);  // ID
@@ -79,6 +71,10 @@ void EmployeeWindow::setupTableModel()
     ui->tvEmployees->setColumnWidth(5, 80);  // Available
     ui->tvEmployees->setColumnWidth(6, 150); // Created At
     ui->tvEmployees->setColumnWidth(7, 150); // Updated At
+    
+    // Set selection behavior
+    ui->tvEmployees->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tvEmployees->setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
 void EmployeeWindow::loadEmployees()
@@ -191,24 +187,52 @@ void EmployeeWindow::onEmployeeTableSelectionChanged()
 
 void EmployeeWindow::onEmployeeCreated(const Employee &employee)
 {
-    Q_UNUSED(employee)
-    loadEmployees(); // Refresh table
+    // Add new employee to table model with the correct ID
+    QList<QStandardItem*> items;
+    items << new QStandardItem(QString::number(employee.getId()));
+    items << new QStandardItem(employee.getName());
+    items << new QStandardItem(employee.getSurname());
+    items << new QStandardItem(employee.getJob());
+    items << new QStandardItem(employee.getPhone());
+    items << new QStandardItem(employee.isAvailable() ? "Yes" : "No");
+    items << new QStandardItem(employee.getCreatedAt().toString("yyyy-MM-dd hh:mm:ss"));
+    items << new QStandardItem(employee.getUpdatedAt().toString("yyyy-MM-dd hh:mm:ss"));
+    
+    m_tableModel->appendRow(items);
     clearForm();
     QMessageBox::information(this, "Success", "Employee created successfully!");
 }
 
 void EmployeeWindow::onEmployeeUpdated(const Employee &employee)
 {
-    Q_UNUSED(employee)
-    loadEmployees(); // Refresh table
+    // Update specific row in table model instead of full reload
+    for (int row = 0; row < m_tableModel->rowCount(); ++row) {
+        QStandardItem *idItem = m_tableModel->item(row, 0);
+        if (idItem && idItem->text().toInt() == employee.getId()) {
+            m_tableModel->setItem(row, 1, new QStandardItem(employee.getName()));
+            m_tableModel->setItem(row, 2, new QStandardItem(employee.getSurname()));
+            m_tableModel->setItem(row, 3, new QStandardItem(employee.getJob()));
+            m_tableModel->setItem(row, 4, new QStandardItem(employee.getPhone()));
+            m_tableModel->setItem(row, 5, new QStandardItem(employee.isAvailable() ? "Yes" : "No"));
+            m_tableModel->setItem(row, 6, new QStandardItem(employee.getCreatedAt().toString("yyyy-MM-dd hh:mm:ss")));
+            m_tableModel->setItem(row, 7, new QStandardItem(employee.getUpdatedAt().toString("yyyy-MM-dd hh:mm:ss")));
+            break;
+        }
+    }
     clearForm();
     QMessageBox::information(this, "Success", "Employee updated successfully!");
 }
 
 void EmployeeWindow::onEmployeeDeleted(int id)
 {
-    Q_UNUSED(id)
-    loadEmployees(); // Refresh table
+    // Remove specific row from table model instead of full reload
+    for (int row = 0; row < m_tableModel->rowCount(); ++row) {
+        QStandardItem *idItem = m_tableModel->item(row, 0);
+        if (idItem && idItem->text().toInt() == id) {
+            m_tableModel->removeRow(row);
+            break;
+        }
+    }
     clearForm();
     QMessageBox::information(this, "Success", "Employee deleted successfully!");
 }
@@ -255,4 +279,40 @@ bool EmployeeWindow::validateForm() const
     }
     
     return true;
+}
+
+void EmployeeWindow::refreshTable()
+{
+    // Store current selection
+    int selectedId = m_selectedEmployeeId;
+    
+    // Reload employees from database
+    loadEmployees();
+    
+    // Restore selection if possible
+    if (selectedId != -1) {
+        for (int row = 0; row < m_tableModel->rowCount(); ++row) {
+            QStandardItem *idItem = m_tableModel->item(row, 0);
+            if (idItem && idItem->text().toInt() == selectedId) {
+                ui->tvEmployees->selectRow(row);
+                break;
+            }
+        }
+    }
+}
+
+void EmployeeWindow::populateForm(const Employee &employee)
+{
+    ui->leEmployeeId->setText(QString::number(employee.getId()));
+    ui->leEmployeeName->setText(employee.getName());
+    ui->leEmployeeSurname->setText(employee.getSurname());
+    ui->leEmployeeJob->setText(employee.getJob());
+    ui->leEmployeePhone->setText(employee.getPhone());
+    ui->chkEmployeeAvailable->setChecked(employee.isAvailable());
+    ui->dtEmployeeCreatedAt->setDateTime(employee.getCreatedAt());
+    ui->dtEmployeeUpdatedAt->setDateTime(employee.getUpdatedAt());
+    
+    m_selectedEmployeeId = employee.getId();
+    ui->btnUpdateEmployee->setEnabled(true);
+    ui->btnDeleteEmployee->setEnabled(true);
 }

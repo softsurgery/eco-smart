@@ -21,6 +21,22 @@ void EmployeeController::createEmployee(const Employee &employee) {
                           newEmployee.getUpdatedAt()};
 
     if (DatabaseUtils::executeQuery(queryStr, params)) {
+        // Retrieve the generated ID by querying the last inserted record
+        QSqlDatabase db = QSqlDatabase::database();
+        QSqlQuery query(db);
+        QString selectQuery = "SELECT id FROM employees WHERE name = ? AND surname = ? AND job = ? AND phone = ? ORDER BY created_at DESC";
+        query.prepare(selectQuery);
+        query.addBindValue(newEmployee.getName());
+        query.addBindValue(newEmployee.getSurname());
+        query.addBindValue(newEmployee.getJob());
+        query.addBindValue(newEmployee.getPhone());
+        
+        if (query.exec() && query.next()) {
+            int generatedId = query.value(0).toInt();
+            newEmployee.setId(generatedId);
+        }
+        query.finish();
+        
         m_employees.append(newEmployee);
         emit employeeCreated(newEmployee);
     }
@@ -80,10 +96,10 @@ void EmployeeController::updateEmployee(const Employee &employee) {
         for (int i = 0; i < m_employees.size(); ++i) {
             if (m_employees[i].getId() == updatedEmployee.getId()) {
                 m_employees[i] = updatedEmployee;
-                emit employeeUpdated(updatedEmployee);
                 return;
             }
         }
+        emit employeeUpdated(updatedEmployee);
     }
 }
 
@@ -95,9 +111,9 @@ void EmployeeController::deleteEmployee(int id) {
         for (int i = 0; i < m_employees.size(); ++i) {
             if (m_employees[i].getId() == id) {
                 m_employees.removeAt(i);
-                emit employeeDeleted(id);
                 return;
             }
         }
+        emit employeeDeleted(id);
     }
 }
