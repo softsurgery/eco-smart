@@ -29,6 +29,9 @@
       </item>
       <item row="7" column="1">
        <widget class="QDateTimeEdit" name="dtEmployeeUpdatedAt">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
         <property name="calendarPopup">
          <bool>true</bool>
         </property>
@@ -97,6 +100,9 @@
       </item>
       <item row="6" column="1">
        <widget class="QDateTimeEdit" name="dtEmployeeCreatedAt">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
         <property name="calendarPopup">
          <bool>true</bool>
         </property>
@@ -110,7 +116,11 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="leEmployeeId"/>
+       <widget class="QLineEdit" name="leEmployeeId">
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

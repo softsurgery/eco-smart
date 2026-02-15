@@ -3,22 +3,15 @@
 
 #include <QString>
 #include <QDateTime>
-#include <QObject>
 
-class Employee : public QObject
+class Employee
 {
-    Q_OBJECT
-    Q_PROPERTY(int id READ getId WRITE setId NOTIFY idChanged)
-    Q_PROPERTY(QString name READ getName WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QString surname READ getSurname WRITE setSurname NOTIFY surnameChanged)
-    Q_PROPERTY(QString job READ getJob WRITE setJob NOTIFY jobChanged)
-    Q_PROPERTY(QString phone READ getPhone WRITE setPhone NOTIFY phoneChanged)
-    Q_PROPERTY(bool available READ isAvailable WRITE setAvailable NOTIFY availableChanged)
-    Q_PROPERTY(QDateTime createdAt READ getCreatedAt WRITE setCreatedAt NOTIFY createdAtChanged)
-    Q_PROPERTY(QDateTime updatedAt READ getUpdatedAt WRITE setUpdatedAt NOTIFY updatedAtChanged)
-
 public:
     explicit Employee(int id = 0, const QString &name = "", const QString &surname = "", const QString &job = "", const QString &phone = "", bool available = true, const QDateTime &createdAt = QDateTime::currentDateTime(), const QDateTime &updatedAt = QDateTime::currentDateTime());
+    
+    // Copy constructor and assignment operator
+    Employee(const Employee &other) = default;
+    Employee& operator=(const Employee &other) = default;
 
     int getId() const;
     void setId(int id);
@@ -43,16 +36,6 @@ public:
 
     QDateTime getUpdatedAt() const;
     void setUpdatedAt(const QDateTime &updatedAt);
-
-signals:
-    void idChanged();
-    void nameChanged();
-    void surnameChanged();
-    void jobChanged();
-    void phoneChanged();
-    void availableChanged();
-    void createdAtChanged();
-    void updatedAtChanged();
 
 private:
     int m_id;

@@ -8,10 +8,7 @@ int Employee::getId() const {
 }
 
 void Employee::setId(int id) {
-    if (m_id != id) {
-        m_id = id;
-        emit idChanged();
-    }
+    m_id = id;
 }
 
 QString Employee::getName() const {
@@ -19,10 +16,7 @@ QString Employee::getName() const {
 }
 
 void Employee::setName(const QString &name) {
-    if (m_name != name) {
-        m_name = name;
-        emit nameChanged();
-    }
+    m_name = name;
 }
 
 QString Employee::getSurname() const {
@@ -30,10 +24,7 @@ QString Employee::getSurname() const {
 }
 
 void Employee::setSurname(const QString &surname) {
-    if (m_surname != surname) {
-        m_surname = surname;
-        emit surnameChanged();
-    }
+    m_surname = surname;
 }
 
 QString Employee::getJob() const {
@@ -41,10 +32,7 @@ QString Employee::getJob() const {
 }
 
 void Employee::setJob(const QString &job) {
-    if (m_job != job) {
-        m_job = job;
-        emit jobChanged();
-    }
+    m_job = job;
 }
 
 QString Employee::getPhone() const {
@@ -52,10 +40,7 @@ QString Employee::getPhone() const {
 }
 
 void Employee::setPhone(const QString &phone) {
-    if (m_phone != phone) {
-        m_phone = phone;
-        emit phoneChanged();
-    }
+    m_phone = phone;
 }
 
 bool Employee::isAvailable() const {
@@ -63,10 +48,7 @@ bool Employee::isAvailable() const {
 }
 
 void Employee::setAvailable(bool available) {
-    if (m_available != available) {
-        m_available = available;
-        emit availableChanged();
-    }
+    m_available = available;
 }
 
 QDateTime Employee::getCreatedAt() const {
@@ -74,10 +56,7 @@ QDateTime Employee::getCreatedAt() const {
 }
 
 void Employee::setCreatedAt(const QDateTime &createdAt) {
-    if (m_createdAt != createdAt) {
-        m_createdAt = createdAt;
-        emit createdAtChanged();
-    }
+    m_createdAt = createdAt;
 }
 
 QDateTime Employee::getUpdatedAt() const {
@@ -85,8 +64,5 @@ QDateTime Employee::getUpdatedAt() const {
 }
 
 void Employee::setUpdatedAt(const QDateTime &updatedAt) {
-    if (m_updatedAt != updatedAt) {
-        m_updatedAt = updatedAt;
-        emit updatedAtChanged();
-    }
+    m_updatedAt = updatedAt;
 }

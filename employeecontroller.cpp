@@ -2,23 +2,38 @@
 #include "databaseutils.h"
 #include <QSqlQuery>
 #include <QVariant>
+#include <QDateTime>
+#include <QDebug>
 
 EmployeeController::EmployeeController(QObject *parent)
     : QObject(parent) {}
 
 void EmployeeController::createEmployee(const Employee &employee) {
-    QString queryStr = "INSERT INTO employees (id, name, surname, job, phone, available, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    QVariantList params = {employee.getId(), employee.getName(), employee.getSurname(), employee.getJob(), employee.getPhone(), employee.isAvailable(), employee.getCreatedAt(), employee.getUpdatedAt()};
+    Employee newEmployee = employee;
+    newEmployee.setCreatedAt(QDateTime::currentDateTime());
+    newEmployee.setUpdatedAt(QDateTime::currentDateTime());
+    
+    // For Oracle with auto-increment trigger, don't specify ID in INSERT
+    QString queryStr = "INSERT INTO employees (name, surname, job, phone, available, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    QVariantList params = {newEmployee.getName(), newEmployee.getSurname(), newEmployee.getJob(), 
+                          newEmployee.getPhone(), newEmployee.isAvailable() ? 1 : 0, 
+                          newEmployee.getCreatedAt(), 
+                          newEmployee.getUpdatedAt()};
 
     if (DatabaseUtils::executeQuery(queryStr, params)) {
-        m_employees.append(employee);
-        emit employeeCreated(employee);
+        m_employees.append(newEmployee);
+        emit employeeCreated(newEmployee);
     }
 }
 
 QList<Employee> EmployeeController::readEmployees() const {
     QList<Employee> employees;
     QSqlQuery query("SELECT id, name, surname, job, phone, available, created_at, updated_at FROM employees");
+
+    if (!query.exec()) {
+        qDebug() << "Failed to execute query:" << query.lastError().text();
+        return employees;
+    }
 
     while (query.next()) {
         Employee employee;
@@ -27,7 +42,7 @@ QList<Employee> EmployeeController::readEmployees() const {
         employee.setSurname(query.value(2).toString());
         employee.setJob(query.value(3).toString());
         employee.setPhone(query.value(4).toString());
-        employee.setAvailable(query.value(5).toBool());
+        employee.setAvailable(query.value(5).toInt() == 1);
         employee.setCreatedAt(query.value(6).toDateTime());
         employee.setUpdatedAt(query.value(7).toDateTime());
         employees.append(employee);
@@ -37,14 +52,19 @@ QList<Employee> EmployeeController::readEmployees() const {
 }
 
 void EmployeeController::updateEmployee(const Employee &employee) {
+    Employee updatedEmployee = employee;
+    updatedEmployee.setUpdatedAt(QDateTime::currentDateTime());
+    
     QString queryStr = "UPDATE employees SET name = ?, surname = ?, job = ?, phone = ?, available = ?, updated_at = ? WHERE id = ?";
-    QVariantList params = {employee.getName(), employee.getSurname(), employee.getJob(), employee.getPhone(), employee.isAvailable(), employee.getUpdatedAt(), employee.getId()};
+    QVariantList params = {updatedEmployee.getName(), updatedEmployee.getSurname(), updatedEmployee.getJob(), 
+                          updatedEmployee.getPhone(), updatedEmployee.isAvailable() ? 1 : 0, 
+                          updatedEmployee.getUpdatedAt(), updatedEmployee.getId()};
 
     if (DatabaseUtils::executeQuery(queryStr, params)) {
         for (int i = 0; i < m_employees.size(); ++i) {
-            if (m_employees[i].getId() == employee.getId()) {
-                m_employees[i] = employee;
-                emit employeeUpdated(employee);
+            if (m_employees[i].getId() == updatedEmployee.getId()) {
+                m_employees[i] = updatedEmployee;
+                emit employeeUpdated(updatedEmployee);
                 return;
             }
         }
